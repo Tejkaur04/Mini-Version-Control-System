@@ -1,9 +1,10 @@
 package vcs;
 
-import vcs.core.Repository;
-
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import vcs.core.Repository;
 
 /**
  * Main class for the Mini VCS command-line interface.
@@ -32,16 +33,28 @@ public class Main {
         Repository repository = new Repository();
 
         try {
-            switch (command) {
-                case "init" -> {
-                    if (args.length < 2) {
-                        System.out.println("Usage: init <directory>");
-                        return;
-                    }
-                    repository.init(args[1]);
+            // Handle 'init' separately as it does not require prior repository existence
+            if (command.equals("init")) {
+                if (args.length < 2) {
+                    System.out.println("Usage: init <directory>");
+                    return;
                 }
+                repository.init(args[1]);
+                return;
+            }
+
+            // Load repository for all other commands
+            String currentDir = Paths.get("").toAbsolutePath().toString();
+            Path vcsDir = Paths.get(currentDir, ".mini-vcs");
+            if (!Files.exists(vcsDir) || !Files.isDirectory(vcsDir)) {
+                System.out.println("Repository not initialized. Run 'init <directory>' first.");
+                return;
+            }
+            repository.load(currentDir);
+
+            // Handle other commands
+            switch (command) {
                 case "add" -> {
-                    ensureRepositoryLoaded(repository);
                     if (args.length < 2) {
                         System.out.println("Usage: add <file>");
                         return;
@@ -49,33 +62,22 @@ public class Main {
                     repository.add(args[1]);
                 }
                 case "commit" -> {
-                    ensureRepositoryLoaded(repository);
                     if (args.length < 2) {
                         System.out.println("Usage: commit <message>");
                         return;
                     }
                     repository.commit(args[1]);
                 }
-                case "status" -> {
-                    ensureRepositoryLoaded(repository);
-                    repository.status();
-                }
-                case "log" -> {
-                    ensureRepositoryLoaded(repository);
-                    repository.log();
-                }
+                case "status" -> repository.status();
+                case "log" -> repository.log();
                 case "checkout" -> {
-                    ensureRepositoryLoaded(repository);
                     if (args.length < 2) {
                         System.out.println("Usage: checkout <commitId>");
                         return;
                     }
                     repository.checkout(args[1]);
                 }
-                case "diff" -> {
-                    ensureRepositoryLoaded(repository);
-                    repository.diff();
-                }
+                case "diff" -> repository.diff();
                 case "help" -> System.out.println(USAGE);
                 default -> {
                     System.out.println("Unknown command: " + command);
@@ -85,10 +87,5 @@ public class Main {
         } catch (IOException | IllegalStateException | IllegalArgumentException e) {
             System.err.println("Error: " + e.getMessage());
         }
-    }
-
-    private static void ensureRepositoryLoaded(Repository repository) throws IOException {
-        String currentDir = Paths.get("").toAbsolutePath().toString();
-        repository.load(currentDir);
     }
 }

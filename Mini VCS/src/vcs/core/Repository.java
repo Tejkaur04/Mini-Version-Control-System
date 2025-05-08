@@ -1,11 +1,10 @@
 package vcs.core;
 
-import vcs.datastructures.HashTable;
-import vcs.util.HashUtils;
-
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Date;
+import vcs.datastructures.HashTable;
+import vcs.util.HashUtils;
 
 /**
  * Repository class that handles the main functionality of the version control system.
@@ -48,10 +47,18 @@ public class Repository {
 
     public void load(String path) {
         this.rootPath = path;
-        this.commitHistory = new CommitHistory(); // TODO: deserialize commit history
+    
+        Path vcsPath = Paths.get(rootPath, ".mini-vcs");
+        if (!Files.exists(vcsPath) || !Files.isDirectory(vcsPath)) {
+            System.out.println("Repository not initialized. Run 'init <directory>' first.");
+            return;
+        }
+    
+        this.commitHistory = new CommitHistory(); // TODO: deserialize if persistent
         this.trackedFiles = new HashTable<>();
-        this.headCommit = commitHistory.getHeadCommit(); // If we persist commits, restore HEAD properly
+        this.headCommit = commitHistory.getHeadCommit(); // Placeholder
     }
+    
 
     public void add(String filePath) {
         try {
@@ -102,7 +109,7 @@ public class Repository {
     }
 
     private boolean isRepositoryInitialized() {
-        Path vcsDir = Paths.get(rootPath, VCS_DIR);
+        Path vcsDir = Paths.get(rootPath, ".mini-vcs");
         return Files.exists(vcsDir) && Files.isDirectory(vcsDir);
     }
 
