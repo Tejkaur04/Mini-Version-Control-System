@@ -196,4 +196,13 @@ public class HashTable<K, V> {
 
         return keys;
     }
+
+    /**
+     * Clears all entries from the hash table.
+     */
+    @SuppressWarnings("unchecked")
+    public void clear() {
+        this.table = (Entry<K, V>[]) new Entry[DEFAULT_CAPACITY]; // Reset to default capacity
+        this.size = 0;
+    }
 }

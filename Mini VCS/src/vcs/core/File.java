@@ -1,12 +1,15 @@
 package vcs.core;
 
+import java.io.Serializable;
 import vcs.datastructures.LinkedList;
 
 /**
  * Represents a file tracked by the version control system.
  * Keeps track of the file's path and version history.
  */
-public class File {
+public class File implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String path;
     private FileVersion currentVersion;
     private LinkedList<FileVersion> versionHistory;
