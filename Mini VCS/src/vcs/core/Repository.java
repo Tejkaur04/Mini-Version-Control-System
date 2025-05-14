@@ -9,7 +9,7 @@ import vcs.util.HashUtils;
 
 public class Repository {
     private static Repository instance;
-    private static String currentRootPath; // To store the current repository root
+    private static String currentRootPath;
 
     private static final String VCS_DIR = ".mini-vcs";
     private static final String OBJECTS_DIR = VCS_DIR + "/objects";
@@ -24,18 +24,16 @@ public class Repository {
     private Repository() {
         this.commitHistory = new CommitHistory();
         this.trackedFiles = new HashTable<>();
-        System.out.println("[DEBUG - Repository] Repository instance created.");
     }
 
     public static Repository getInstance(String rootPath) throws IOException {
-        System.out.println("[DEBUG - Repository - getInstance] Requested with rootPath: " + rootPath);
-        if (instance == null || (currentRootPath != null && !currentRootPath.equals(rootPath))) {
-            System.out.println("[DEBUG - Repository - getInstance] Creating new instance or root path changed.");
+        if (instance == null) {
             instance = new Repository();
-            instance.load(rootPath); // Load repository data if it exists
             currentRootPath = rootPath;
-        } else {
-            System.out.println("[DEBUG - Repository - getInstance] Returning existing instance.");
+            instance.load(rootPath);
+        } else if (currentRootPath != null && !currentRootPath.equals(rootPath)) {
+            currentRootPath = rootPath;
+            instance.load(rootPath);
         }
         return instance;
     }
@@ -47,10 +45,9 @@ public class Repository {
     public void init(String path) throws IOException {
         this.currentRootPath = path;
         Path vcsPath = Paths.get(currentRootPath, VCS_DIR);
-        System.out.println("[DEBUG - Repository - init] Initializing repository at: " + path);
         if (Files.exists(vcsPath) && Files.isDirectory(vcsPath)) {
             System.out.println("Mini VCS repository already exists at " + vcsPath.toAbsolutePath());
-            load(path); // Load existing repository
+            load(path);
             return;
         }
 
@@ -59,38 +56,30 @@ public class Repository {
         Files.write(Paths.get(currentRootPath, HEAD_FILE), new byte[0]);
 
         System.out.println("Initialized empty Mini VCS repository at " + vcsPath.toAbsolutePath());
-        this.trackedFiles.clear(); // Start with a clean staging area
+        this.trackedFiles.clear();
         saveIndex();
-        System.out.println("[DEBUG - Repository - init] Finished initialization.");
     }
 
     public void load(String path) {
         this.currentRootPath = path;
-        System.out.println("[DEBUG - Repository - load] Loading repository from: " + path);
         Path vcsPath = Paths.get(currentRootPath, VCS_DIR);
         if (!Files.exists(vcsPath) || !Files.isDirectory(vcsPath)) {
-            System.out.println("[DEBUG - Repository - load] Repository not initialized.");
             this.trackedFiles.clear();
             this.commitHistory = new CommitHistory();
             this.headCommit = null;
-            System.out.println("[DEBUG - Repository - load] Finished loading (not initialized).");
             return;
         }
 
         try {
-            loadIndex(); // Load staged files
-            System.out.println("[DEBUG - Repository - load] Index loaded. trackedFiles size: " + this.trackedFiles.size());
-            // TODO: Load commit history and HEAD
-            this.commitHistory = new CommitHistory(); // Placeholder for loading
-            this.headCommit = commitHistory.getHeadCommit(); // Placeholder
+            loadIndex();
+            this.commitHistory = new CommitHistory();
+            this.headCommit = commitHistory.getHeadCommit();
         } catch (IOException e) {
             System.err.println("Error loading repository data: " + e.getMessage());
             this.trackedFiles.clear();
             this.commitHistory = new CommitHistory();
             this.headCommit = null;
-            System.out.println("[DEBUG - Repository - load] Error during loadIndex: " + e.getMessage());
         }
-        System.out.println("[DEBUG - Repository - load] Finished loading.");
     }
 
     public void add(String filePath) {
@@ -99,7 +88,7 @@ public class Repository {
                 System.out.println("Repository not initialized. Run 'init' first.");
                 return;
             }
-            addFile(filePath);
+            addFileInternal(filePath);
         } catch (IOException e) {
             System.err.println("Failed to add file: " + e.getMessage());
         }
@@ -142,9 +131,8 @@ public class Repository {
         return Files.exists(vcsDir) && Files.isDirectory(vcsDir);
     }
 
-    private void addFile(String filePath) throws IOException {
+    private void addFileInternal(String filePath) throws IOException {
         Path fullPath = Paths.get(currentRootPath, filePath);
-        System.out.println("[DEBUG - Repository - addFile] Adding file: " + filePath);
         if (!Files.exists(fullPath) || Files.isDirectory(fullPath)) {
             throw new IllegalArgumentException("File does not exist or is a directory: " + filePath);
         }
@@ -157,20 +145,12 @@ public class Repository {
 
         File file = new File(filePath, fileVersion);
         trackedFiles.put(filePath, file);
-        System.out.println("[DEBUG - Repository - addFile] File added to trackedFiles. Size: " + trackedFiles.size());
 
         saveIndex();
-        System.out.println("[DEBUG - Repository - addFile] Index saved.");
         System.out.println("Added file: " + filePath);
     }
 
     private void commitInternal(String message) throws IOException {
-        System.out.println("[DEBUG - Repository - commitInternal] Starting commit. trackedFiles size: " + trackedFiles.size());
-        System.out.println("[DEBUG - Repository - commitInternal] Contents of trackedFiles:");
-        for (String key : trackedFiles.keys()) {
-            System.out.println("[DEBUG - Repository - commitInternal]   - " + key);
-        }
-
         if (trackedFiles.isEmpty()) {
             throw new IllegalStateException("Nothing to commit.");
         }
@@ -187,15 +167,13 @@ public class Repository {
 
         commit.generateId();
         saveCommit(commit);
-        System.out.println("[DEBUG - Repository - commitInternal] Commit saved.");
 
         this.headCommit = commit;
         this.commitHistory.addCommit(commit);
 
         Files.write(Paths.get(currentRootPath, HEAD_FILE), commit.getId().getBytes());
-        Files.deleteIfExists(Paths.get(currentRootPath, INDEX_FILE)); // Clear the staging index
-        trackedFiles.clear(); // Clear staged files after commit
-        System.out.println("[DEBUG - Repository - commitInternal] Index cleared and trackedFiles cleared.");
+        Files.deleteIfExists(Paths.get(currentRootPath, INDEX_FILE));
+        trackedFiles.clear();
 
         System.out.println("Created commit: " + commit.getId() + " - " + message);
     }
@@ -203,12 +181,10 @@ public class Repository {
     private void saveFileVersion(FileVersion version) throws IOException {
         Path objectPath = Paths.get(currentRootPath, OBJECTS_DIR, version.getHash());
         Files.write(objectPath, version.getContent());
-        System.out.println("[DEBUG - Repository - saveFileVersion] File version saved: " + version.getHash());
     }
 
     private void saveCommit(Commit commit) {
         // TODO: Serialize the commit object and save under OBJECTS_DIR
-        System.out.println("[DEBUG - Repository - saveCommit] Saving commit: " + commit.getId());
     }
 
     private void saveIndex() throws IOException {
@@ -221,20 +197,16 @@ public class Repository {
         }
 
         Files.write(indexPath, content.toString().getBytes());
-        System.out.println("[DEBUG - Repository - saveIndex] Index file written.");
     }
 
     private void loadIndex() throws IOException {
         trackedFiles.clear();
         Path indexPath = Paths.get(currentRootPath, INDEX_FILE);
-        System.out.println("[DEBUG - Repository - loadIndex] Loading index from: " + indexPath);
         if (!Files.exists(indexPath)) {
-            System.out.println("[DEBUG - Repository - loadIndex] Index file does not exist.");
             return;
         }
 
         List<String> lines = Files.readAllLines(indexPath);
-        System.out.println("[DEBUG - Repository - loadIndex] Read " + lines.size() + " lines from index.");
         for (String line : lines) {
             if (!line.contains("=")) continue;
 
@@ -247,12 +219,8 @@ public class Repository {
                 FileVersion version = new FileVersion(hash, content);
                 File file = new File(path, version);
                 trackedFiles.put(path, file);
-                System.out.println("[DEBUG - Repository - loadIndex] Added to trackedFiles: " + path + " with hash " + hash);
-            } else {
-                System.out.println("[DEBUG - Repository - loadIndex] Object file not found for: " + path + " with hash " + hash);
             }
         }
-        System.out.println("[DEBUG - Repository - loadIndex] Finished loading index. trackedFiles size: " + trackedFiles.size());
     }
 
     public void diff() {
@@ -264,7 +232,6 @@ public class Repository {
     }
 
     private void statusInternal() throws IOException {
-        // TODO: Compare working directory with HEAD commit files and index
         System.out.println("Status check not yet implemented.");
     }
 }
