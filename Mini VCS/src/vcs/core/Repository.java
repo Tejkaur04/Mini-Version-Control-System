@@ -98,32 +98,32 @@ public class Repository {
     }
 
     private void rebuildHistory(String headCommitId)
-        throws IOException {
+            throws IOException {
 
-    java.util.List<Commit> commits =
-            new java.util.ArrayList<>();
+        java.util.List<Commit> commits
+                = new java.util.ArrayList<>();
 
-    Commit current = loadCommit(headCommitId);
+        Commit current = loadCommit(headCommitId);
 
-    while (current != null) {
+        while (current != null) {
 
-        commits.add(current);
+            commits.add(current);
 
-        if (current.getParent() == null) {
-            break;
+            if (current.getParent() == null) {
+                break;
+            }
+
+            current = loadCommit(current.getParent());
         }
 
-        current = loadCommit(current.getParent());
+        java.util.Collections.reverse(commits);
+
+        for (Commit commit : commits) {
+            commitHistory.addCommit(commit);
+        }
+
+        this.headCommit = loadCommit(headCommitId);
     }
-
-    java.util.Collections.reverse(commits);
-
-    for (Commit commit : commits) {
-        commitHistory.addCommit(commit);
-    }
-
-    this.headCommit = loadCommit(headCommitId);
-}
 
     public void add(String filePath) {
         try {
@@ -149,14 +149,55 @@ public class Repository {
         }
     }
 
+    public void inspectHead() {
+
+        if (headCommit == null) {
+            System.out.println("No HEAD commit.");
+            return;
+        }
+
+        System.out.println("HEAD = " + headCommit.getId());
+
+        for (String file : headCommit.getFiles()) {
+            System.out.println(file);
+        }
+    }
+
+    // public void log() {
+    //     if (!isRepositoryInitialized()) {
+    //         System.out.println("Repository not initialized. Run 'init' first.");
+    //         return;
+    //     }
+    //     System.out.println(commitHistory.getHistoryGraph());
+    // }
     public void log() {
+
         if (!isRepositoryInitialized()) {
             System.out.println("Repository not initialized. Run 'init' first.");
             return;
         }
+
+        for (Commit commit : commitHistory.getCommitHistory()) {
+            System.out.println(
+                    "FULL ID = " + commit.getId()
+            );
+        }
+
         System.out.println(commitHistory.getHistoryGraph());
+
+        System.out.println("\n===== HEAD FILES =====");
+
+        if (headCommit != null) {
+
+            for (String file : headCommit.getFiles()) {
+
+                System.out.println(
+                        file + " -> "
+                        + headCommit.getFileVersionId(file)
+                );
+            }
+        }
     }
-    
 
     public void commit(String message) {
         if (!isRepositoryInitialized()) {
@@ -199,16 +240,33 @@ public class Repository {
             throw new IllegalStateException("Nothing to commit.");
         }
 
-        
         Commit commit = new Commit();
         commit.setMessage(message);
         commit.setTimestamp(new Date());
-        
+
         commit.setParent(headCommit != null ? headCommit.getId() : null);
 
+        // Copy parent snapshot first
+        if (headCommit != null) {
+
+            for (String filePath : headCommit.getFiles()) {
+
+                commit.addFile(
+                        filePath,
+                        headCommit.getFileVersionId(filePath)
+                );
+            }
+        }
+
+// Apply staged changes on top
         for (String filePath : trackedFiles.keys()) {
+
             File file = trackedFiles.get(filePath);
-            commit.addFile(filePath, file.getCurrentVersion().getHash());
+
+            commit.addFile(
+                    filePath,
+                    file.getCurrentVersion().getHash()
+            );
         }
 
         commit.generateId();
@@ -238,7 +296,6 @@ public class Repository {
                 commit.serialize()
         );
     }
-    
 
     private Commit loadCommit(String commitId) throws IOException {
 
@@ -299,11 +356,142 @@ public class Repository {
         System.out.println("Diff feature not yet implemented.");
     }
 
+    private byte[] loadFileVersion(String hash) throws IOException {
+
+        Path objectPath
+                = Paths.get(
+                        currentRootPath,
+                        OBJECTS_DIR,
+                        hash
+                );
+
+        if (!Files.exists(objectPath)) {
+            throw new IOException(
+                    "Missing object: " + hash
+            );
+        }
+
+        return Files.readAllBytes(objectPath);
+    }
+
     public void checkout(String commitId) {
-        System.out.println("Checkout feature not yet implemented.");
+
+        try {
+
+            Commit commit = loadCommit(commitId);
+
+            if (commit == null) {
+
+                System.out.println(
+                        "Commit not found: "
+                        + commitId
+                );
+
+                return;
+            }
+
+            System.out.println(
+                    "Checking out commit: "
+                    + commit.getId()
+            );
+
+            // Restore all files from the commit
+            for (String filePath : commit.getFiles()) {
+
+                String hash
+                        = commit.getFileVersionId(filePath);
+
+                byte[] content
+                        = loadFileVersion(hash);
+
+                Path target
+                        = Paths.get(
+                                currentRootPath,
+                                filePath
+                        );
+
+                Files.write(
+                        target,
+                        content
+                );
+
+                System.out.println(
+                        "[CHECKOUT] Restored "
+                        + filePath
+                );
+            }
+
+            // Update HEAD
+            Files.write(
+                    Paths.get(
+                            currentRootPath,
+                            HEAD_FILE
+                    ),
+                    commit.getId().getBytes()
+            );
+
+            // Reload repository state
+            load(currentRootPath);
+
+            System.out.println(
+                    "Checkout completed."
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            System.err.println(
+                    "Checkout failed: "
+                    + e.getMessage()
+            );
+        }
     }
 
     private void statusInternal() throws IOException {
-        System.out.println("Status check not yet implemented.");
+
+        if (headCommit == null) {
+            System.out.println("No commits yet.");
+            return;
+        }
+
+        boolean clean = true;
+
+        for (String filePath : headCommit.getFiles()) {
+
+            String storedHash
+                    = headCommit.getFileVersionId(filePath);
+
+            Path workingFile
+                    = Paths.get(currentRootPath, filePath);
+
+            if (!Files.exists(workingFile)) {
+
+                System.out.println(
+                        "Deleted: " + filePath);
+
+                clean = false;
+                continue;
+            }
+
+            byte[] content
+                    = Files.readAllBytes(workingFile);
+
+            String currentHash
+                    = HashUtils.generateSHA1(
+                            new String(content));
+
+            if (!currentHash.equals(storedHash)) {
+
+                System.out.println(
+                        "Modified: " + filePath);
+
+                clean = false;
+            }
+        }
+
+        if (clean) {
+            System.out.println("Working tree clean");
+        }
     }
 }
