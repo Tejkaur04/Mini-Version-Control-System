@@ -5,8 +5,15 @@ import {
     Folder,
     Activity,
 } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 export default function Sidebar() {
+    const navClass = ({ isActive }) =>
+        `flex items-center gap-3 px-4 py-3 rounded-xl transition
+   ${isActive
+            ? "bg-amber-100 text-amber-700"
+            : "hover:bg-gray-100"
+        }`;
     return (
         <aside className="w-64 bg-white border-r border-gray-200 p-6">
             <div className="mb-12">
@@ -19,12 +26,44 @@ export default function Sidebar() {
                 </p>
             </div>
 
-            <nav className="mt-10 space-y-4">
-                <div>🏠 Dashboard</div>
-                <div>📝 Commits</div>
-                <div>🌿 Branches</div>
-                <div>📁 Repository</div>
-                <div>📊 Status</div>
+            <nav className="space-y-2">
+
+                <NavLink
+                    to="/"
+                    className={navClass}
+                >
+                    
+                    🏠 Dashboard
+                </NavLink>
+
+                <NavLink
+                    to="/commits"
+                    className={navClass}
+                >
+                    📝 Commits
+                </NavLink>
+
+                <NavLink
+                    to="/branches"
+                    className={navClass}
+                >
+                    🌿 Branches
+                </NavLink>
+
+                <NavLink
+                    to="/repository"
+                    className={navClass}
+                >
+                    📁 Repository
+                </NavLink>
+
+                <NavLink
+                    to="/status"
+                    className={navClass}
+                >
+                    📊 Status
+                </NavLink>
+
             </nav>
         </aside>
     );
