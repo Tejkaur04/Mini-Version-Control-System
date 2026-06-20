@@ -4,16 +4,24 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Manages the history of commits in the repository.
- * Provides methods to navigate through the commit history.
+ * Manages the history of commits in the repository. Provides methods to
+ * navigate through the commit history.
  */
 public class CommitHistory implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     private Map<String, Commit> commits;
     private Map<String, String> branches;
     private String currentBranch;
     private String headCommitId;
+
+    public void setBranchHead(
+            String branchName,
+            String commitId
+    ) {
+        branches.put(branchName, commitId);
+    }
 
     public CommitHistory() {
         this.commits = new HashMap<>();
@@ -38,7 +46,7 @@ public class CommitHistory implements Serializable {
     }
 
     // Get the parent commit ID of a commit
-    public String getParentId(String commitId){
+    public String getParentId(String commitId) {
         Commit commit = commits.get(commitId);
         return commit != null ? commit.getParentId() : null;
     }
@@ -53,7 +61,9 @@ public class CommitHistory implements Serializable {
 
         while (currentId != null) {
             Commit commit = commits.get(currentId);
-            if (commit == null) break;
+            if (commit == null) {
+                break;
+            }
 
             history.add(0, commit);
             currentId = commit.getParentId();  // This now fetches from Commit's parentId
@@ -71,13 +81,17 @@ public class CommitHistory implements Serializable {
     }
 
     public boolean createBranch(String branchName) {
-        if (branches.containsKey(branchName)) return false;
+        if (branches.containsKey(branchName)) {
+            return false;
+        }
         branches.put(branchName, headCommitId);
         return true;
     }
 
     public boolean switchBranch(String branchName) {
-        if (!branches.containsKey(branchName)) return false;
+        if (!branches.containsKey(branchName)) {
+            return false;
+        }
         currentBranch = branchName;
         headCommitId = branches.get(branchName);
         return true;
@@ -96,16 +110,22 @@ public class CommitHistory implements Serializable {
     }
 
     public boolean checkout(String commitId) {
-        if (!commits.containsKey(commitId)) return false;
+        if (!commits.containsKey(commitId)) {
+            return false;
+        }
         headCommitId = commitId;
         return true;
     }
 
     public Commit mergeBranch(String branchName) {
-        if (!branches.containsKey(branchName)) return null;
+        if (!branches.containsKey(branchName)) {
+            return null;
+        }
 
         String branchHeadId = branches.get(branchName);
-        if (branchHeadId == null) return null;
+        if (branchHeadId == null) {
+            return null;
+        }
 
         Commit branchHead = commits.get(branchHeadId);
         Commit currentHead = getHeadCommit();
@@ -118,10 +138,10 @@ public class CommitHistory implements Serializable {
 
         // Updated Commit constructor call with correct parameters
         Commit mergeCommit = new Commit(
-            "Merge branch '" + branchName + "' into " + currentBranch,
-            currentHead.getId()
+                "Merge branch '" + branchName + "' into " + currentBranch,
+                currentHead.getId()
         );
-        
+
         // The mergeCommit should have the current commit and branch commit as parents
         mergeCommit.setParent(currentHead.getId());
 
@@ -136,8 +156,8 @@ public class CommitHistory implements Serializable {
         for (Commit commit : history) {
             String commitId = commit.getId();
             String shortId = commitId != null && commitId.length() >= 7
-                ? commitId.substring(0, 7)
-                : commitId;
+                    ? commitId.substring(0, 7)
+                    : commitId;
 
             StringBuilder branchInfo = new StringBuilder();
             for (Map.Entry<String, String> branch : branches.entrySet()) {
@@ -147,12 +167,12 @@ public class CommitHistory implements Serializable {
             }
 
             graph.append(shortId)
-                 .append(branchInfo)
-                 .append(" - ")
-                 .append(commit.getMessage())
-                 .append(" (")
-                 .append(commit.getTimestamp())
-                 .append(")\n");
+                    .append(branchInfo)
+                    .append(" - ")
+                    .append(commit.getMessage())
+                    .append(" (")
+                    .append(commit.getTimestamp())
+                    .append(")\n");
         }
 
         return graph.toString();
@@ -160,7 +180,7 @@ public class CommitHistory implements Serializable {
 
     @Override
     public String toString() {
-        return "CommitHistory[commits=" + commits.size() +
-               ", currentBranch=" + currentBranch + "]";
+        return "CommitHistory[commits=" + commits.size()
+                + ", currentBranch=" + currentBranch + "]";
     }
 }

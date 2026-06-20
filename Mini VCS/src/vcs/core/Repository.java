@@ -17,7 +17,7 @@ public class Repository {
     private static final String REFS_DIR = VCS_DIR + "/refs";
     private static final String HEAD_FILE = VCS_DIR + "/HEAD";
     private static final String INDEX_FILE = VCS_DIR + "/index";
-
+    private static final String CURRENT_BRANCH_FILE = VCS_DIR + "/CURRENT_BRANCH";
     private CommitHistory commitHistory;
     private HashTable<String, File> trackedFiles;
     private Commit headCommit;
@@ -75,6 +75,8 @@ public class Repository {
             loadIndex();
 
             this.commitHistory = new CommitHistory();
+
+            loadBranches();
 
             Path headPath
                     = Paths.get(currentRootPath, HEAD_FILE);
@@ -163,40 +165,60 @@ public class Repository {
         }
     }
 
-    // public void log() {
-    //     if (!isRepositoryInitialized()) {
-    //         System.out.println("Repository not initialized. Run 'init' first.");
-    //         return;
-    //     }
-    //     System.out.println(commitHistory.getHistoryGraph());
-    // }
     public void log() {
-
         if (!isRepositoryInitialized()) {
             System.out.println("Repository not initialized. Run 'init' first.");
             return;
         }
-
-        for (Commit commit : commitHistory.getCommitHistory()) {
-            System.out.println(
-                    "FULL ID = " + commit.getId()
-            );
-        }
-
         System.out.println(commitHistory.getHistoryGraph());
+    }
+    
 
-        System.out.println("\n===== HEAD FILES =====");
+    private void deleteExtraFiles(Commit targetCommit)
+            throws IOException {
 
-        if (headCommit != null) {
+        Path repoRoot
+                = Paths.get(currentRootPath);
 
-            for (String file : headCommit.getFiles()) {
+        Files.list(repoRoot)
+                .filter(Files::isRegularFile)
+                .forEach(path -> {
 
-                System.out.println(
-                        file + " -> "
-                        + headCommit.getFileVersionId(file)
-                );
-            }
-        }
+                    String fileName
+                            = path.getFileName().toString();
+
+                    boolean existsInCommit = false;
+
+                    for (String commitFile
+                            : targetCommit.getFiles()) {
+
+                        if (commitFile.equals(fileName)) {
+
+                            existsInCommit = true;
+                            break;
+                        }
+                    }
+
+                    if (!existsInCommit) {
+
+                        try {
+
+                            Files.delete(path);
+
+                            System.out.println(
+                                    "[CHECKOUT] Removed "
+                                    + fileName
+                            );
+
+                        } catch (IOException e) {
+
+                            System.err.println(
+                                    "Failed to delete "
+                                    + fileName
+                            );
+                        }
+                    }
+                });
     }
 
     public void commit(String message) {
@@ -274,6 +296,8 @@ public class Repository {
 
         this.headCommit = commit;
         this.commitHistory.addCommit(commit);
+        
+        saveBranches();
 
         Files.write(Paths.get(currentRootPath, HEAD_FILE), commit.getId().getBytes());
         Files.deleteIfExists(Paths.get(currentRootPath, INDEX_FILE));
@@ -378,9 +402,36 @@ public class Repository {
 
         try {
 
-            Commit commit = loadCommit(commitId);
+            if (isBranch(commitId)) {
 
-            if (commit == null) {
+                String branchName = commitId;
+
+                String branchHead
+                        = commitHistory.getBranchHead(branchName);
+
+                if (branchHead == null) {
+
+                    System.out.println(
+                            "Branch has no commits."
+                    );
+
+                    return;
+                }
+
+                commitHistory.switchBranch(branchName);
+
+                saveBranches();
+
+                System.out.println(
+                        "Switching to branch: "
+                        + branchName
+                );
+
+                commitId = branchHead;
+            }
+
+            Commit commit = loadCommit(commitId);
+             if (commit == null) {
 
                 System.out.println(
                         "Commit not found: "
@@ -394,6 +445,7 @@ public class Repository {
                     "Checking out commit: "
                     + commit.getId()
             );
+            deleteExtraFiles(commit);
 
             // Restore all files from the commit
             for (String filePath : commit.getFiles()) {
@@ -448,6 +500,110 @@ public class Repository {
         }
     }
 
+    
+    
+    // public void checkout(String commitId) {
+
+    //     if (isBranch(commitId)) {
+
+    //         String branchHead
+    //                 = commitHistory.getBranchHead(commitId);
+
+    //         if (branchHead == null) {
+
+    //             System.out.println(
+    //                     "Branch has no commits."
+    //             );
+
+    //             return;
+    //         }
+
+    //         String branchName = commitId;
+
+    //         commitHistory.switchBranch(commitId);
+    //         saveBranches();
+
+    //         commitId = branchHead;
+
+    //         System.out.println(
+    //                 "Switching to branch: "
+    //                 + branchName
+    //         );
+    //     }
+
+    //     try {
+
+    //         Commit commit = loadCommit(commitId);
+
+    //         if (commit == null) {
+
+    //             System.out.println(
+    //                     "Commit not found: "
+    //                     + commitId
+    //             );
+
+    //             return;
+    //         }
+
+    //         System.out.println(
+    //                 "Checking out commit: "
+    //                 + commit.getId()
+    //         );
+    //         deleteExtraFiles(commit);
+
+    //         // Restore all files from the commit
+    //         for (String filePath : commit.getFiles()) {
+
+    //             String hash
+    //                     = commit.getFileVersionId(filePath);
+
+    //             byte[] content
+    //                     = loadFileVersion(hash);
+
+    //             Path target
+    //                     = Paths.get(
+    //                             currentRootPath,
+    //                             filePath
+    //                     );
+
+    //             Files.write(
+    //                     target,
+    //                     content
+    //             );
+
+    //             System.out.println(
+    //                     "[CHECKOUT] Restored "
+    //                     + filePath
+    //             );
+    //         }
+
+    //         // Update HEAD
+    //         Files.write(
+    //                 Paths.get(
+    //                         currentRootPath,
+    //                         HEAD_FILE
+    //                 ),
+    //                 commit.getId().getBytes()
+    //         );
+
+    //         // Reload repository state
+    //         load(currentRootPath);
+
+    //         System.out.println(
+    //                 "Checkout completed."
+    //         );
+
+    //     } catch (Exception e) {
+
+    //         e.printStackTrace();
+
+    //         System.err.println(
+    //                 "Checkout failed: "
+    //                 + e.getMessage()
+    //         );
+    //     }
+    // }
+
     private void statusInternal() throws IOException {
 
         if (headCommit == null) {
@@ -494,4 +650,152 @@ public class Repository {
             System.out.println("Working tree clean");
         }
     }
+
+    private void saveBranches()
+            throws IOException {
+
+        Path refsDir
+                = Paths.get(
+                        currentRootPath,
+                        REFS_DIR
+                );
+
+        Files.createDirectories(refsDir);
+
+        for (String branch
+                : commitHistory.getBranches()) {
+
+            String head
+                    = commitHistory.getBranchHead(branch);
+
+            if (head == null) {
+                head = "";
+            }
+
+            Files.write(
+                    refsDir.resolve(branch),
+                    head.getBytes()
+            );
+        }
+
+        Files.write(
+                Paths.get(
+                        currentRootPath,
+                        CURRENT_BRANCH_FILE
+                ),
+                commitHistory.getCurrentBranch()
+                        .getBytes()
+        );
+    }
+
+    public void createBranch(String branchName) {
+
+        try {
+
+            if (commitHistory.createBranch(branchName)) {
+
+                saveBranches();
+
+                System.out.println(
+                        "Created branch: "
+                        + branchName
+                );
+
+            } else {
+
+                System.out.println(
+                        "Branch already exists."
+                );
+            }
+
+        } catch (IOException e) {
+
+            System.err.println(
+                    "Failed to save branches: "
+                    + e.getMessage()
+            );
+        }
+    }
+
+    // public void listBranches() {
+    //     for (String branch
+    //             : commitHistory.getBranches()) {
+    //         if (branch.equals(
+    //                 commitHistory.getCurrentBranch()
+    //         )) {
+    //             System.out.println(
+    //                     "* " + branch
+    //             );
+    //         } else {
+    //             System.out.println(
+    //                     "  " + branch
+    //             );
+    //         }
+    //     }
+    // }
+    public void listBranches() {
+
+        for (String branch
+                : commitHistory.getBranches()) {
+
+            System.out.println(
+                    branch
+                    + " -> "
+                    + commitHistory.getBranchHead(branch)
+            );
+        }
+    }
+
+    private void loadBranches() throws IOException {
+
+        Path refsDir
+                = Paths.get(
+                        currentRootPath,
+                        REFS_DIR
+                );
+
+        if (!Files.exists(refsDir)) {
+            return;
+        }
+
+        for (Path branchFile
+                : Files.list(refsDir).toList()) {
+
+            String branchName
+                    = branchFile.getFileName().toString();
+
+            String commitId
+                    = Files.readString(branchFile).trim();
+
+            commitHistory.createBranch(branchName);
+            commitHistory.setBranchHead(
+                    branchName,
+                    commitId.isEmpty()
+                    ? null
+                    : commitId
+            );
+
+            Path currentBranchFile
+                    = Paths.get(
+                            currentRootPath,
+                            CURRENT_BRANCH_FILE
+                    );
+
+            if (Files.exists(currentBranchFile)) {
+
+                String currentBranch
+                        = Files.readString(currentBranchFile)
+                                .trim();
+
+                commitHistory.switchBranch(currentBranch);
+            }
+        }
+    }
+
+    private boolean isBranch(String name) {
+
+        return commitHistory.getBranches()
+                .contains(name);
+    }
+
 }

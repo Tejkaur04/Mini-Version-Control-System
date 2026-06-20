@@ -5,18 +5,25 @@ import java.nio.file.Paths;
 import vcs.core.Repository;
 
 public class Main {
+
     private static final String USAGE = """
-        Mini VCS - Available Commands:
-        ---------------------------------
-        init <directory>                     Initialize a new repository
-        add <file>                         Add a file to tracking
-        commit <message>                   Commit current tracked changes
-        status                             Show repository status
-        log                                Show commit history
-        checkout <commitId>                Checkout a specific commit
-        diff                               Show differences with HEAD
-        help                               Show this help message
-        """;
+    Mini VCS - Available Commands:
+    ---------------------------------
+    init <directory>                  Initialize a new repository
+    add <file>                        Add a file to tracking
+    commit <message>                  Commit staged changes
+    status                            Show repository status
+    log                               Show commit history
+
+    checkout <commitId>               Checkout a commit
+    checkout <branchName>             Switch to a branch
+
+    branch                            List all branches
+    branch <name>                     Create a new branch
+
+    diff                              Show differences with HEAD
+    help                              Show this help message
+    """;
 
     public static void main(String[] args) {
         if (args.length == 0) {
@@ -56,8 +63,10 @@ public class Main {
                     }
                     repository.commit(args[1]);
                 }
-                case "status" -> repository.status();
-                case "log" -> repository.log();
+                case "status" ->
+                    repository.status();
+                case "log" ->
+                    repository.log();
                 case "checkout" -> {
                     if (args.length < 2) {
                         System.out.println("Usage: checkout <commitId>");
@@ -65,8 +74,17 @@ public class Main {
                     }
                     repository.checkout(args[1]);
                 }
-                case "diff" -> repository.diff();
-                case "help" -> System.out.println(USAGE);
+                case "branch" -> {
+                    if (args.length == 1) {
+                        repository.listBranches();
+                    } else {
+                        repository.createBranch(args[1]);
+                    }
+                }
+                case "diff" ->
+                    repository.diff();
+                case "help" ->
+                    System.out.println(USAGE);
                 default -> {
                     System.out.println("Unknown command: " + command);
                     System.out.println(USAGE);
