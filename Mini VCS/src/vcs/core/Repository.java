@@ -8,6 +8,7 @@ import vcs.datastructures.HashTable;
 import vcs.util.HashUtils;
 
 public class Repository {
+
     private static Repository instance;
     private static String currentRootPath;
 
@@ -72,8 +73,22 @@ public class Repository {
 
         try {
             loadIndex();
+
             this.commitHistory = new CommitHistory();
-            this.headCommit = commitHistory.getHeadCommit();
+
+            Path headPath
+                    = Paths.get(currentRootPath, HEAD_FILE);
+
+            if (Files.exists(headPath)) {
+
+                String headCommitId
+                        = Files.readString(headPath).trim();
+
+                if (!headCommitId.isEmpty()) {
+
+                    rebuildHistory(headCommitId);
+                }
+            }
         } catch (IOException e) {
             System.err.println("Error loading repository data: " + e.getMessage());
             this.trackedFiles.clear();
@@ -81,6 +96,34 @@ public class Repository {
             this.headCommit = null;
         }
     }
+
+    private void rebuildHistory(String headCommitId)
+        throws IOException {
+
+    java.util.List<Commit> commits =
+            new java.util.ArrayList<>();
+
+    Commit current = loadCommit(headCommitId);
+
+    while (current != null) {
+
+        commits.add(current);
+
+        if (current.getParent() == null) {
+            break;
+        }
+
+        current = loadCommit(current.getParent());
+    }
+
+    java.util.Collections.reverse(commits);
+
+    for (Commit commit : commits) {
+        commitHistory.addCommit(commit);
+    }
+
+    this.headCommit = loadCommit(headCommitId);
+}
 
     public void add(String filePath) {
         try {
@@ -113,6 +156,7 @@ public class Repository {
         }
         System.out.println(commitHistory.getHistoryGraph());
     }
+    
 
     public void commit(String message) {
         if (!isRepositoryInitialized()) {
@@ -155,9 +199,11 @@ public class Repository {
             throw new IllegalStateException("Nothing to commit.");
         }
 
+        
         Commit commit = new Commit();
         commit.setMessage(message);
         commit.setTimestamp(new Date());
+        
         commit.setParent(headCommit != null ? headCommit.getId() : null);
 
         for (String filePath : trackedFiles.keys()) {
@@ -183,8 +229,32 @@ public class Repository {
         Files.write(objectPath, version.getContent());
     }
 
-    private void saveCommit(Commit commit) {
-        // TODO: Serialize the commit object and save under OBJECTS_DIR
+    private void saveCommit(Commit commit) throws IOException {
+        Path commitPath
+                = Paths.get(currentRootPath, OBJECTS_DIR, commit.getId());
+
+        Files.write(
+                commitPath,
+                commit.serialize()
+        );
+    }
+    
+
+    private Commit loadCommit(String commitId) throws IOException {
+
+        Path commitPath
+                = Paths.get(currentRootPath,
+                        OBJECTS_DIR,
+                        commitId);
+
+        if (!Files.exists(commitPath)) {
+            return null;
+        }
+
+        byte[] data
+                = Files.readAllBytes(commitPath);
+
+        return Commit.deserialize(data);
     }
 
     private void saveIndex() throws IOException {
@@ -208,7 +278,9 @@ public class Repository {
 
         List<String> lines = Files.readAllLines(indexPath);
         for (String line : lines) {
-            if (!line.contains("=")) continue;
+            if (!line.contains("=")) {
+                continue;
+            }
 
             String[] parts = line.split("=", 2);
             String path = parts[0];
