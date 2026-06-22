@@ -14,13 +14,7 @@ export default function Dashboard() {
     return (
 
         <MainLayout>
-            <h1 className="text-5xl font-bold">
-                myrepo
-            </h1>
-
-            <p className="text-gray-500 mt-2">
-                Current Branch • feature-auth
-            </p>
+            
 
             <div className="grid grid-cols-12 gap-6">
 

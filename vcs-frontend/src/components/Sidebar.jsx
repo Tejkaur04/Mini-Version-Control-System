@@ -4,6 +4,11 @@ import {
     History,
     Folder,
     Activity,
+    HomeIcon,
+    GitBranchIcon,
+    HistoryIcon,
+    FolderIcon,
+    ActivityIcon,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -32,36 +37,40 @@ export default function Sidebar() {
                     to="/"
                     className={navClass}
                 >
-                    
-                    🏠 Dashboard
+                <HomeIcon></HomeIcon>
+                     Dashboard
                 </NavLink>
 
                 <NavLink
                     to="/commits"
                     className={navClass}
                 >
-                    📝 Commits
+                    <GitBranchIcon></GitBranchIcon>
+                     Commits
                 </NavLink>
 
                 <NavLink
                     to="/branches"
                     className={navClass}
                 >
-                    🌿 Branches
+                    <HistoryIcon></HistoryIcon>
+                     Branches
                 </NavLink>
 
                 <NavLink
                     to="/repository"
                     className={navClass}
                 >
-                    📁 Repository
+                    <FolderIcon></FolderIcon>
+                     Repository
                 </NavLink>
 
                 <NavLink
                     to="/status"
                     className={navClass}
                 >
-                    📊 Status
+                    <ActivityIcon></ActivityIcon>
+                     Status
                 </NavLink>
 
             </nav>

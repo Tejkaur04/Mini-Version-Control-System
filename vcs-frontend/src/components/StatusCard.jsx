@@ -1,3 +1,9 @@
+import {
+  FileEdit,
+  Trash2,
+  FileQuestion,
+  CheckCircle2,
+} from "lucide-react";
 
 export default function StatusCard() {
   return (
@@ -16,45 +22,128 @@ export default function StatusCard() {
         Repository Status
       </h3>
 
-      <div
-        className="
-        bg-green-50
-        border
-        border-green-100
-        rounded-2xl
-        p-4
-        mb-6
-      "
-      >
-        <p className="font-semibold text-green-700">
-          ✓ Working Tree Clean
-        </p>
+      
+        <div
+          className="
+  bg-green-50
+  border
+  border-green-100
+  rounded-2xl
+  p-4
+  mb-6
+  "
+        >
 
-        <p className="text-sm text-green-600 mt-1">
-          No changes to commit
-        </p>
-      </div>
+          <div className="flex items-center gap-2">
+
+            <CheckCircle2
+              size={18}
+              className="text-green-600"
+            />
+
+            <span className="font-semibold text-green-700">
+              Working Tree Clean
+            </span>
+
+          </div>
+
+          <p
+            className="
+    text-sm
+    text-green-600
+    mt-2
+    "
+          >
+            No pending changes detected
+          </p>
+
+        </div>
+
+        
 
       <div className="space-y-4">
-        <div className="flex justify-between">
-          <span>Modified</span>
-          <span className="font-semibold text-blue-500">
+        <div
+          className="
+  bg-blue-50
+  rounded-xl
+  p-3
+  flex
+  justify-between
+  items-center
+  "
+        >
+
+          <div className="flex items-center gap-2 hover:scale-[1.02] transition-all duration-200">
+
+            <FileEdit
+              size={16}
+              className="text-blue-500"
+            />
+
+            <span>Modified</span>
+
+          </div>
+
+          <span className="font-semibold">
             1
           </span>
+
         </div>
 
-        <div className="flex justify-between">
-          <span>Deleted</span>
-          <span className="font-semibold text-red-500">
+        <div
+          className="
+  bg-red-50
+  rounded-xl
+  p-3
+  flex
+  justify-between
+  items-center
+  "
+        >
+
+          <div className="flex items-center gap-2 hover:scale-[1.02] transition-all duration-200">
+
+            <Trash2
+              size={16}
+              className="text-red-500"
+            />
+
+            <span>Deleted</span>
+
+          </div>
+
+          <span className="font-semibold">
             0
           </span>
+
         </div>
 
-        <div className="flex justify-between">
-          <span>Untracked</span>
-          <span className="font-semibold text-amber-500">
+        <div
+          className="
+  bg-amber-50
+  rounded-xl
+  p-3
+  flex
+  justify-between
+  items-center
+  "
+        >
+
+          <div className="flex items-center gap-2 hover:scale-[1.02] transition-all duration-200">
+
+            <FileQuestion
+              size={16}
+              className="text-amber-500"
+            />
+
+            <span>Untracked</span>
+
+          </div>
+
+          <span className="font-semibold">
             2
           </span>
+
         </div>
       </div>
     </div>
