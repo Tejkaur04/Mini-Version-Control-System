@@ -1,396 +1,322 @@
-# 🚀 Mini Version Control System (Mini VCS)
+# 🚀 Mini VCS
 
-A Git-inspired Version Control System built entirely from scratch in Java.
+A Git-inspired Version Control System built from scratch using **Java, Spring Boot, React, and custom data structures**.
 
-Mini VCS recreates the fundamental concepts behind modern version control systems such as Git, including commit snapshots, content-addressable storage, branching, checkout operations, repository persistence, and file state tracking.
-
-The goal of this project was to understand how version control systems work internally rather than relying on existing tools.
+Mini VCS allows users to track files, create commits, manage branches, visualize repository history, and monitor repository status through an interactive web dashboard.
 
 ---
 
-## ✨ Highlights
+## 📸 Screenshots
 
-✅ Repository initialization
+> Add screenshots here after uploading them to GitHub.
 
-✅ Snapshot-based commits
+### Dashboard
 
-✅ Persistent object storage
+![Dashboard](screenshots/dashboard.png)
 
-✅ SHA-1 content addressing
+### Commit Graph
 
-✅ Commit history tracking
+![Commit Graph](screenshots/commit-graph.png)
 
-✅ Branch creation and switching
+### Branches
 
-✅ Checkout using commit IDs and branch names
+![Branches](screenshots/branches.png)
 
-✅ Modified, Deleted, and Untracked file detection
+### Repository Explorer
 
-✅ Custom-built data structures
+![Repository](screenshots/repository.png)
 
-✅ Git-inspired command-line interface
+### Status Page
 
----
-
-## 🎯 Why This Project?
-
-Version control systems are one of the most important tools in software engineering, yet many developers use them without understanding how they work under the hood.
-
-Mini VCS was built to explore:
-
-* How commits are stored and reconstructed
-* How snapshots represent repository state
-* How branching works internally
-* How file tracking and checkout operations function
-* How repository metadata can be persisted across sessions
-
-Instead of using Git libraries or existing implementations, all core functionality was developed from scratch in Java.
+![Status](screenshots/status.png)
 
 ---
 
-## 🏗️ System Architecture
+## ✨ Features
+
+### Repository Management
+
+* Initialize repositories
+* Track files and versions
+* Monitor repository status
+* Browse tracked files
+
+### Commit Management
+
+* Create commits with messages
+* Maintain commit history
+* Track parent-child relationships
+* View commit metadata
+
+### Branch Management
+
+* Create branches
+* Switch between branches
+* Track branch heads
+* Merge branch histories
+
+### Interactive Dashboard
+
+* Live repository statistics
+* Dynamic commit graph
+* Repository status monitoring
+* Recent activity feed
+
+### File Versioning
+
+* SHA-1 based file tracking
+* Version history management
+* File metadata visualization
+
+---
+
+## 🧩 Custom Data Structures
+
+To better understand the internals of version control systems, several data structures were implemented from scratch and integrated into the project:
+
+* Linked List
+* Stack
+* Queue
+* Hash Table
+* Binary Search Tree
+
+These structures are used throughout the repository, commit, and version management modules.
+
+---
+
+## 🔗 Full Stack Integration
+
+The Version Control System was originally implemented as a Java application.
+
+To make it interactive and easier to visualize, a Spring Boot API layer was built on top of the core VCS engine. The React frontend communicates with these APIs to display repository data in real time.
 
 ```text
-Working Directory
-        │
-        ▼
-    add(file)
-        │
-        ▼
-   Staging Area
-      (Index)
-        │
-        ▼
- commit(message)
-        │
-        ▼
-   Commit Object
-        │
-        ▼
- Object Storage
- (.mini-vcs/objects)
-        │
-        ▼
- Commit History
+React Frontend
+       │
+       ▼
+Spring Boot REST API
+       │
+       ▼
+Mini VCS Engine
+       │
+       ▼
+Custom Data Structures
 ```
 
 ---
 
-## 📂 Repository Structure
+## 📊 Commit Graph Visualization
 
-```text
-myrepo/
-│
-├── .mini-vcs/
-│   ├── objects/
-│   │   ├── <file-hash>
-│   │   └── <commit-hash>
-│   │
-│   ├── refs/
-│   │   ├── master
-│   │   ├── feature-auth
-│   │   └── test
-│   │
-│   ├── HEAD
-│   ├── CURRENT_BRANCH
-│   └── index
-│
-└── project files...
-```
+One of the core features of Mini VCS is the dynamic commit graph.
 
-### Objects
+The graph is generated directly from repository commit history and visualized using React Flow.
 
-Stores:
+Features include:
 
-* Commit objects
-* File snapshots
-
-Each object is identified using a SHA-1 hash.
-
-### Refs
-
-Stores branch references and their latest commit hashes.
-
-### HEAD
-
-Stores the currently checked-out commit.
-
-### CURRENT_BRANCH
-
-Stores the active branch name.
-
----
-
-# 🛠️ Technologies Used
-
-* Java
-* File I/O (NIO)
-* SHA-1 Hashing
-* Custom Data Structures
-* Command Line Interface (CLI)
-
----
-
-# 📚 Custom Data Structures
-
-The project implements several data structures from scratch.
-
-| Data Structure   | Purpose                                          |
-| ---------------- | ------------------------------------------------ |
-| HashTable        | Fast lookup of tracked files and commit metadata |
-| LinkedList       | Commit history traversal                         |
-| BinarySearchTree | Version indexing and retrieval                   |
-| Stack            | State management and future traversal operations |
-| Queue            | Internal processing workflows                    |
-
----
-
-# ⚙️ Prerequisites
-
-* Java JDK 17 or higher
-* PowerShell / Command Prompt / Terminal
-
-Verify installation:
-
-```bash
-java --version
-```
-
----
-
-# 🚀 Getting Started
-
-## Clone the Repository
-
-```bash
-git clone <repository-url>
-cd Mini-Version-Control-System
-```
-
----
-
-## Compile the Project
-
-### Windows
-
-```bash
-run.bat
-```
-
-### Manual Compilation
-
-```bash
-javac -d out src/vcs/Main.java src/vcs/core/*.java src/vcs/datastructures/*.java src/vcs/util/*.java
-```
-
----
-
-## Run the Application
-
-```bash
-java -cp out vcs.Main
-```
-
----
-
-# 📖 Quick Demo
-
-## Initialize Repository
-
-```bash
-java -cp out vcs.Main init myrepo
-```
-
-Output:
-
-```text
-Initialized empty Mini VCS repository
-```
-
-Move into repository:
-
-```bash
-cd myrepo
-```
-
----
-
-## Create a File
-
-```bash
-echo Hello World > hello.txt
-```
-
----
-
-## Add File
-
-```bash
-java -cp ../out vcs.Main add hello.txt
-```
-
-Output:
-
-```text
-Added file: hello.txt
-```
-
----
-
-## Commit Changes
-
-```bash
-java -cp ../out vcs.Main commit "Initial commit"
-```
-
-Output:
-
-```text
-Created commit: 1ef06fcba2557d58bfe21f21fd1406a28c4cbf6b
-```
-
----
-
-## View Commit History
-
-```bash
-java -cp ../out vcs.Main log
-```
+* Dynamic node generation
+* Parent-child commit relationships
+* HEAD commit highlighting
+* Real-time updates from backend APIs
+* Interactive repository history visualization
 
 Example:
 
 ```text
-1ef06fc - Initial commit
-6550628 - Added feature
+debug
+  │
+  ▼
+next
+  │
+  ▼
+hello (HEAD)
 ```
+
+Unlike static diagrams, the graph is generated entirely from actual commit data.
 
 ---
 
-# 🌿 Branching
+## 📈 Dashboard Features
 
-## Create a Branch
+The dashboard provides a real-time overview of repository activity.
 
-```bash
-java -cp ../out vcs.Main branch feature-auth
-```
+### Repository Insights
 
-Output:
+* Total commits
+* Active branches
+* Tracked files
+* Current HEAD commit
 
-```text
-Created branch: feature-auth
-```
-
----
-
-## View Branches
-
-```bash
-java -cp ../out vcs.Main branch
-```
-
-Example:
-
-```text
-* master -> 6550628...
-  feature-auth -> 1ef06fc...
-```
-
----
-
-## Switch Branch
-
-```bash
-java -cp ../out vcs.Main checkout feature-auth
-```
-
----
-
-# 🔄 Checkout
-
-## Checkout a Commit
-
-Using full commit ID:
-
-```bash
-java -cp ../out vcs.Main checkout 6550628a0cd55bd1ca9dab0e26109ce20386b21d
-```
-
-Using shortened commit ID:
-
-```bash
-java -cp ../out vcs.Main checkout 6550628
-```
-
----
-
-## Checkout a Branch
-
-```bash
-java -cp ../out vcs.Main checkout master
-```
-
----
-
-# 📊 Status Tracking
-
-Check repository status:
-
-```bash
-java -cp ../out vcs.Main status
-```
-
-Example output:
-
-```text
-Modified: hello.txt
-Deleted: notes.txt
-Untracked: temp.txt
-```
-
-Mini VCS currently detects:
+### Repository Status
 
 * Modified files
 * Deleted files
 * Untracked files
+* Working tree health
+
+### Recent Activity
+
+* Latest commits
+* Commit timestamps
+* Repository updates
 
 ---
 
-# 📜 Command Reference
+## 🛠️ Tech Stack
 
-| Command               | Description            |
-| --------------------- | ---------------------- |
-| `init <directory>`    | Initialize repository  |
-| `add <file>`          | Stage a file           |
-| `commit <message>`    | Create commit snapshot |
-| `status`              | Show repository status |
-| `log`                 | Show commit history    |
-| `branch`              | List all branches      |
-| `branch <name>`       | Create a new branch    |
-| `checkout <branch>`   | Switch branch          |
-| `checkout <commitId>` | Checkout a commit      |
-| `help`                | Display help menu      |
+### Frontend
 
----
+* React.js
+* Tailwind CSS
+* React Flow
+* Axios
+* Lucide React
 
-# 🔮 Future Enhancements
+### Backend
 
-* Merge support
-* Diff visualization
-* Interactive commit graph
-* React-based frontend dashboard
-* Remote repositories
-* Push/Pull support
+* Java
+* Spring Boot
+* REST APIs
+
+### Core VCS Engine
+
+* Repository Management
+* Commit Tracking
+* Branch Management
+* File Versioning
 
 ---
 
-# 🤝 Contributing
+## 📂 Project Structure
 
-Contributions, suggestions, and improvements are welcome.
-
-Feel free to fork the repository and submit pull requests.
+```text
+Mini-VCS
+│
+├── mini-vcs-ui
+│   ├── components
+│   ├── pages
+│   ├── services
+│   └── layout
+│
+├── mini-vcs-api
+│   ├── controller
+│   ├── service
+│   ├── dto
+│   └── vcs
+│
+└── core-engine
+    ├── Repository
+    ├── Commit
+    ├── CommitHistory
+    ├── File
+    └── FileVersion
+```
 
 ---
 
-# 📄 License
+## 📡 REST API Endpoints
 
-This project was built for educational and learning purposes.
+### Dashboard
+
+```http
+GET /api/dashboard
+```
+
+Returns repository statistics including commit count, branch count, tracked files, and current HEAD.
+
+### Commits
+
+```http
+GET /api/commits
+```
+
+Returns commit history and metadata.
+
+### Branches
+
+```http
+GET /api/branches
+```
+
+Returns branch information and current branch details.
+
+### Repository Files
+
+```http
+GET /api/files
+```
+
+Returns tracked files and metadata.
+
+### Repository Status
+
+```http
+GET /api/status
+```
+
+Returns modified, deleted, and untracked files.
+
+---
+
+## 💡 Challenges Solved
+
+During development, several interesting problems were addressed:
+
+* Designing commit-parent relationships
+* Implementing branch tracking and checkout functionality
+* Building file version management using SHA-1 hashes
+* Exposing a Java-based VCS through REST APIs
+* Synchronizing frontend visualizations with backend repository data
+* Generating dynamic commit graphs from repository history
+* Integrating custom data structures into a real-world application
+
+---
+
+## 🚀 Running the Project
+
+### Backend
+
+```bash
+cd mini-vcs-api
+./mvnw spring-boot:run
+```
+
+Runs on:
+
+```text
+http://localhost:8080
+```
+
+### Frontend
+
+```bash
+cd mini-vcs-ui
+npm install
+npm run dev
+```
+
+Runs on:
+
+```text
+http://localhost:5173
+```
+
+---
+
+## 🔮 Future Improvements
+
+* Branch checkout from UI
+* Branch creation and deletion
+* Merge conflict visualization
+* Commit search and filtering
+* File diff viewer
+* Multi-repository support
+* Authentication and user profiles
+* Dark mode
+* GitHub integration
+
+---
+
+## 👩‍💻 Author
+
+**Tejinder Kaur**
+Passionate about Software Engineering, Backend Development, Open Source, and Building Systems from Scratch.
