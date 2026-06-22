@@ -8,7 +8,13 @@ import {
 
 export default function CommitDetails({ commit }) {
 
-  if (!commit) return null;
+  if (!commit) {
+    return (
+      <div className="bg-white rounded-3xl p-6">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div
@@ -39,14 +45,14 @@ export default function CommitDetails({ commit }) {
               className="text-gray-400"
             />
 
-            <span className="text-xs text-gray-500 uppercase tracking-wide">
+            <span className="text-xs text-gray-500 uppercase tracking-wide text-wrap">
               Commit ID
             </span>
 
           </div>
 
           <p className="font-mono font-semibold">
-            {commit.id}
+            {commit.id?.substring(0, 7)}
           </p>
 
         </div>
@@ -92,7 +98,9 @@ export default function CommitDetails({ commit }) {
           </div>
 
           <p className="font-mono">
-            {commit.parent}
+            {commit.parent
+              ? commit.parent.substring(0, 7)
+              : "None"}
           </p>
 
         </div>
@@ -115,7 +123,7 @@ export default function CommitDetails({ commit }) {
           </div>
 
           <p>
-            {commit.timestamp}
+            {commit.timestamp || "--"}
           </p>
 
         </div>

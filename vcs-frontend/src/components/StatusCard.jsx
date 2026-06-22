@@ -5,7 +5,12 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-export default function StatusCard() {
+export default function StatusCard({ status }) {
+  const isClean =
+    (status?.modified?.length || 0) === 0 &&
+    (status?.deleted?.length || 0) === 0 &&
+    (status?.untracked?.length || 0) === 0;
+
   return (
     <div
       className="
@@ -22,44 +27,47 @@ export default function StatusCard() {
         Repository Status
       </h3>
 
-      
-        <div
-          className="
-  bg-green-50
-  border
-  border-green-100
-  rounded-2xl
-  p-4
-  mb-6
-  "
+
+      <div
+        className={`
+    rounded-2xl
+    p-4
+    mb-6
+    border
+    ${isClean
+            ? "bg-green-50 border-green-100"
+            : "bg-amber-50 border-amber-100"
+          }
+  `}
+      >
+
+
+
+        <span
+          className={`font-semibold ${isClean
+            ? "text-green-700"
+            : "text-amber-700"
+            }`}
         >
+          {isClean
+            ? "Working Tree Clean"
+            : "Changes Detected"}
+        </span>
 
-          <div className="flex items-center gap-2">
+        <p
+          className={`text-sm mt-2 ${isClean
+              ? "text-green-600"
+              : "text-amber-600"
+            }`}
+        >
+          {isClean
+            ? "No pending changes detected"
+            : "Repository contains uncommitted changes"}
+        </p>
 
-            <CheckCircle2
-              size={18}
-              className="text-green-600"
-            />
+      </div>
 
-            <span className="font-semibold text-green-700">
-              Working Tree Clean
-            </span>
 
-          </div>
-
-          <p
-            className="
-    text-sm
-    text-green-600
-    mt-2
-    "
-          >
-            No pending changes detected
-          </p>
-
-        </div>
-
-        
 
       <div className="space-y-4">
         <div
@@ -85,7 +93,7 @@ export default function StatusCard() {
           </div>
 
           <span className="font-semibold">
-            1
+            {status?.modified?.length || 0}
           </span>
 
         </div>
@@ -113,7 +121,7 @@ export default function StatusCard() {
           </div>
 
           <span className="font-semibold">
-            0
+            {status?.deleted?.length || 0}
           </span>
 
         </div>
@@ -141,7 +149,7 @@ export default function StatusCard() {
           </div>
 
           <span className="font-semibold">
-            2
+            {status?.untracked?.length || 0}
           </span>
 
         </div>

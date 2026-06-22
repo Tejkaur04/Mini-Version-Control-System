@@ -17,11 +17,10 @@ export default function CommitCard({
   transition-all
   hover:shadow-md
 
-  ${
-    selected
-      ? "bg-amber-50 border-amber-300"
-      : "bg-white border-gray-100"
-  }
+  ${selected
+          ? "bg-amber-50 border-amber-300"
+          : "bg-white border-gray-100"
+        }
 `}
     >
       <div className="flex items-center gap-3">
@@ -58,9 +57,11 @@ export default function CommitCard({
         {commit.id}
       </p>
 
-      <p className="text-sm text-gray-400 mt-2">
-        {commit.timestamp}
-      </p>
+      {commit.timestamp && (
+        <p className="text-sm text-gray-400 mt-2">
+          {commit.timestamp}
+        </p>
+      )}
     </div>
   );
 }

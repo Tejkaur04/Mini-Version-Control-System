@@ -2,12 +2,11 @@ import ReactFlow from "reactflow";
 
 import "reactflow/dist/style.css";
 
-import {
-  nodes,
-  edges,
-} from "../data/graphData";
+
+import { CommitGraph } from "CommitGraph.jsx";
 
 export default function CommitGraphPage() {
+
   return (
     <div
       className="
@@ -17,9 +16,11 @@ export default function CommitGraphPage() {
       overflow-hidden
       "
     >
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
         fitView
       />
     </div>

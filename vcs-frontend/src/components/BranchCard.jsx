@@ -43,22 +43,22 @@ export default function BranchCard({
                     HEAD
                 </p>
 
-                <p className="font-mono">
-                    {branch.head}
+                <p className="font-mono text-sm">
+                    {branch.head?.substring(0, 7)}
                 </p>
 
                 <p className="text-sm text-gray-500 mt-4">
-                    Commits
+                    HEAD Commit
                 </p>
 
-                <p>
-                    {branch.commits}
+                <p className="font-mono text-sm">
+                    {branch.head?.substring(0, 7)}
                 </p>
 
             </div>
             <div className="mt-6 flex justify-between items-center">
-            <button
-                className="
+                <button
+                    className="
     flex-1
     m-2            
     px-4
@@ -72,12 +72,12 @@ export default function BranchCard({
     transition-all
     duration-200
   "
-            >
-                Checkout
-            </button>
-            
-            <button
-                className="
+                >
+                    Checkout
+                </button>
+
+                <button
+                    className="
     flex-1
     px-4
     py-3
@@ -90,9 +90,9 @@ export default function BranchCard({
     transition-all
     duration-200
   "
-            >
-                Delete
-            </button>
+                >
+                    Delete
+                </button>
             </div>
 
         </div>

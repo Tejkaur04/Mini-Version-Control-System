@@ -1,28 +1,62 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import MainLayout from "../layout/MainLayout";
 
 import CommitCard from "../components/CommitCard";
 import CommitDetails from "../components/CommitDetails";
 
-import { commits } from "../data/mockCommits";
+import vcsApi from "../services/vcsApi";
 
 export default function Commits() {
 
     const [selectedCommit, setSelectedCommit] =
-        useState(commits[0]);
+        useState(null);
+    const [commits, setCommits] =
+        useState([]);
+
+    useEffect(() => {
+
+        vcsApi
+            .get("/commits")
+            .then((response) => {
+
+                setCommits(response.data);
+
+                if (response.data.length > 0) {
+                    setSelectedCommit(response.data[0]);
+                }
+
+            });
+
+    }, []);
 
     return (
         <MainLayout>
 
-            <div className="mb-8">
-                <h1 className="text-5xl font-bold">
+
+
+            <div
+                className="
+  bg-white
+  rounded-3xl
+  border
+  border-gray-100
+  shadow-sm
+  p-6
+  mb-6
+  "
+            >
+
+                <h2 className="text-2xl font-bold">
                     Commits
-                </h1>
+                </h2>
 
                 <p className="text-gray-500 mt-2">
                     Browse repository history
                 </p>
+
+
+
             </div>
 
             <div className="grid grid-cols-12 gap-6">
@@ -59,7 +93,9 @@ export default function Commits() {
                             </p>
 
                             <h2 className="text-xl font-mono">
-                                {commits[0].id}
+                                {commits.length > 0
+                                    ? commits[0].id.substring(0, 7)
+                                    : "--"}
                             </h2>
                         </div>
 
@@ -92,7 +128,7 @@ export default function Commits() {
                             <CommitCard
                                 key={commit.id}
                                 commit={commit}
-                                selected={selectedCommit.id === commit.id}
+                                selected={selectedCommit?.id === commit.id}
                                 onSelect={setSelectedCommit}
                             />
                         ))}

@@ -51,7 +51,7 @@ shadow-sm">
           </p>
 
           <p className="font-medium">
-            {file.hash}
+            {file.hash?.substring(0, 12)}
           </p>
 
         </div>

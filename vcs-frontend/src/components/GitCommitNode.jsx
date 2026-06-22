@@ -2,50 +2,50 @@ import { Handle, Position } from "reactflow";
 
 
 export default function GitCommitNode({ data }) {
-  return (
-    <>
-      <Handle
-        type="target"
-        position={Position.Top}
-      />
+    return (
+        <>
+            <Handle
+                type="target"
+                position={Position.Top}
+            />
 
-      <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
 
-        <div
-          className="
+                <div
+                    className="
           w-4
           h-4
           rounded-full
           bg-amber-500
           "
-        />
+                />
 
-        <div>
+                <div>
 
-          <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
 
-            <p className="font-medium">
-              {data.message}
-            </p>
+                        <p className="font-medium">
+                            {data.message}
+                        </p>
 
-            {data.head && (
-              <span
-                className="
-                px-2
-                py-1
-                text-xs
-                bg-green-100
-                text-green-700
-                rounded-full
-                "
-              >
-                HEAD
-              </span>
-            )}
+                        {data.head && (
+                            <span
+                                className="
+      text-xs
+      px-2
+      py-1
+      bg-green-100
+      text-green-700
+      rounded-full
+    "
+                            >
+                                HEAD
+                            </span>
+                        )}
 
-            {data.branch && (
-              <span
-                className="
+                        {data.branch && (
+                            <span
+                                className="
                 px-2
                 py-1
                 text-xs
@@ -53,31 +53,35 @@ export default function GitCommitNode({ data }) {
                 text-amber-700
                 rounded-full
                 "
-              >
-                {data.branch}
-              </span>
-            )}
+                            >
+                                {data.branch}
+                            </span>
+                        )}
 
-          </div>
+                    </div>
 
-          <p
-            className="
+                    <p
+                        className="
             text-xs
             text-gray-500
             font-mono
             "
-          >
-            {data.hash}
-          </p>
+                    >
+                        {data.hash}
+                    </p>
 
-        </div>
+                    <p className="text-xs text-gray-400">
+                        {data.timestamp}
+                    </p>
 
-      </div>
+                </div>
 
-      <Handle
-        type="source"
-        position={Position.Bottom}
-      />
-    </>
-  );
+            </div>
+
+            <Handle
+                type="source"
+                position={Position.Bottom}
+            />
+        </>
+    );
 }
