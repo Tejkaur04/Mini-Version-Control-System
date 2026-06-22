@@ -10,26 +10,6 @@ Mini VCS allows users to track files, create commits, manage branches, visualize
 
 > Add screenshots here after uploading them to GitHub.
 
-### Dashboard
-
-![Dashboard](screenshots/dashboard.png)
-
-### Commit Graph
-
-![Commit Graph](screenshots/commit-graph.png)
-
-### Branches
-
-![Branches](screenshots/branches.png)
-
-### Repository Explorer
-
-![Repository](screenshots/repository.png)
-
-### Status Page
-
-![Status](screenshots/status.png)
-
 ---
 
 ## ✨ Features
