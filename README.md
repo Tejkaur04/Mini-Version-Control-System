@@ -7,8 +7,15 @@ Mini VCS allows users to track files, create commits, manage branches, visualize
 ---
 
 ## 📸 Screenshots
+<img width="1346" height="628" alt="Image" src="https://github.com/user-attachments/assets/862d889e-9d4c-49b1-af51-c0ea0a7a5009" />
 
-> Add screenshots here after uploading them to GitHub.
+<img width="1346" height="631" alt="Image" src="https://github.com/user-attachments/assets/9308cc03-69b7-4f2e-af36-0730070d28e3" />
+
+<img width="1350" height="634" alt="Image" src="https://github.com/user-attachments/assets/eb25e28e-2857-408b-99c7-2a1133b403a7" />
+
+<img width="1350" height="626" alt="Image" src="https://github.com/user-attachments/assets/bc54b638-d096-4a2a-baae-f3c323b20a6e" />
+
+<img width="1359" height="624" alt="Image" src="https://github.com/user-attachments/assets/7325ef2c-8435-4cfe-b02e-2abf70d04b66" />
 
 ---
 
